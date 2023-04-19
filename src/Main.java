@@ -1,18 +1,11 @@
-import java.util.ArrayList;
-import java.util.Scanner;
-
-//Aden Amin
-// 03/09
-//Java
-
+import java.util.*;
 
 public class Main {
     private static Scanner input = new Scanner(System.in);
 
-
     public static void main(String[] args) {
-        ArrayList<Task> tasks = new ArrayList<>();
-        //Creates the menu to pick from
+        TaskCollection tasks = new TaskCollection();
+
         System.out.println("Please choose an option:");
         System.out.println("(1) Add a task.");
         System.out.println("(2) Remove a task.");
@@ -20,8 +13,8 @@ public class Main {
         System.out.println("(4) List all task.");
         System.out.println("(5) List by priority");
         System.out.println("(0) Exit.");
-        try {
 
+        try {
             int userInput = input.nextInt();
             input.nextLine();
 
@@ -36,11 +29,9 @@ public class Main {
                     listTask(tasks);
                 } else if (userInput == 3) {
                     updateTask(tasks);
-
                 } else if (userInput == 5) {
                     prioCheck(tasks);
                 }
-
 
                 System.out.println("Please make another selection");
                 userInput = input.nextInt();
@@ -49,13 +40,9 @@ public class Main {
         } catch (Exception e) {
             System.out.println("something went wrong");
         }
-
-
     }
 
-    //All the following code are the functions for the menu to work. Like to add tasks, delete tasks, change tasks, list tasks and to close it.
-    private static ArrayList<Task> addTask(ArrayList<Task> tasks) {
-
+    private static void addTask(TaskCollection tasks) {
         System.out.println("Please enter a title for your new task");
         String title = input.nextLine();
 
@@ -68,23 +55,20 @@ public class Main {
 
         Task aNewTask = new Task(title, desc, prio);
 
-
         tasks.add(aNewTask);
-        return tasks;
     }
 
-    static ArrayList<Task> removeTask(ArrayList<Task> tasks) {
-        System.out.println("Enter the task to remove");
-        String rem = input.nextLine();
-        tasks.remove(Integer.parseInt(rem));
-        return tasks;
+    private static void removeTask(TaskCollection tasks) {
+        System.out.println("Enter the task index to remove");
+        int rem = input.nextInt();
+        tasks.remove(rem);
     }
 
-    static void listTask(ArrayList<Task> tasks) {
+    private static void listTask(TaskCollection tasks) {
         System.out.println(tasks);
     }
 
-    static ArrayList<Task> updateTask(ArrayList<Task> tasks) {
+    private static void updateTask(TaskCollection tasks) {
         System.out.println("What index would you like to replace?");
         int ind = input.nextInt();
         input.nextLine();
@@ -101,21 +85,110 @@ public class Main {
 
         Task aNewTask = new Task(title, desc, prio);
         tasks.set(ind, aNewTask);
-        return tasks;
-
     }
 
-    static ArrayList<Task> prioCheck(ArrayList<Task> tasks) {
+    private static void prioCheck(TaskCollection tasks) {
         System.out.println("What priority would you like me to find?");
+        int userInput = input.nextInt();
+
         for (Task item : tasks) {
-            int userInput = input.nextInt();
             int prio = item.getPriority();
             if (prio == userInput) {
                 System.out.println(item);
             }
         }
+    }
+}
 
+class Task implements Comparable<Task> {
+    private String title;
+    private String desc;
+    private int priority;
 
-        return tasks;
+    public Task(String title, String desc, int priority) {
+        this.title = title;
+        this.desc = desc;
+        this.priority = priority;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDesc() {
+        return desc;
+    }
+
+    public void setDesc(String desc) {
+        this.desc = desc;
+    }
+
+    public int getPriority() {
+        return
+                priority;
+    }
+    public void setPriority(int priority) {
+        this.priority = priority;
+    }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "title='" + title + '\'' +
+                ", desc='" + desc + '\'' +
+                ", priority=" + priority +
+                '}';
+    }
+
+    @Override
+    public int compareTo(Task other) {
+        if (this.priority != other.priority) {
+            return other.priority - this.priority;
+        }
+        return this.title.compareTo(other.title);
+    }
+}
+
+class TaskCollection implements Iterable<Task> {
+    private List<Task> tasks;
+
+    public TaskCollection() {
+        tasks = new ArrayList<>();
+    }
+
+    public void add(Task task) {
+        tasks.add(task);
+        Collections.sort(tasks);
+    }
+
+    public Task get(int index) {
+        return tasks.get(index);
+    }
+
+    public void remove(int index) {
+        tasks.remove(index);
+    }
+
+    public void set(int index, Task task) {
+        tasks.set(index, task);
+        Collections.sort(tasks);
+    }
+
+    public int size() {
+        return tasks.size();
+    }
+
+    @Override
+    public Iterator<Task> iterator() {
+        return tasks.iterator();
+    }
+
+    @Override
+    public String toString() {
+        return tasks.toString();
     }
 }
