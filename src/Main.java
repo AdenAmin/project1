@@ -1,17 +1,31 @@
-import java.util.*;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Scanner;
 
 public class Main {
     private static Scanner input = new Scanner(System.in);
+    private static final String JSON_FILE = "tasks.json";
 
     public static void main(String[] args) {
         TaskCollection tasks = new TaskCollection();
+        tasks.loadFromFile(JSON_FILE);
 
         System.out.println("Please choose an option:");
         System.out.println("(1) Add a task.");
         System.out.println("(2) Remove a task.");
         System.out.println("(3) Update a task.");
-        System.out.println("(4) List all task.");
-        System.out.println("(5) List by priority");
+        System.out.println("(4) List all tasks.");
+        System.out.println("(5) List tasks by priority");
         System.out.println("(0) Exit.");
 
         try {
@@ -22,6 +36,7 @@ public class Main {
                 if (userInput == 1) {
                     addTask(tasks);
                 } else if (userInput == 0) {
+                    tasks.saveToFile(JSON_FILE);
                     System.exit(0);
                 } else if (userInput == 2) {
                     removeTask(tasks);
@@ -105,7 +120,9 @@ class Task implements Comparable<Task> {
     private String desc;
     private int priority;
 
-    public Task(String title, String desc, int priority) {
+    public Task(@JsonProperty("title") String title,
+                @JsonProperty("description") String desc,
+                @JsonProperty("priority") int priority) {
         this.title = title;
         this.desc = desc;
         this.priority = priority;
@@ -128,9 +145,9 @@ class Task implements Comparable<Task> {
     }
 
     public int getPriority() {
-        return
-                priority;
+        return priority;
     }
+
     public void setPriority(int priority) {
         this.priority = priority;
     }
@@ -182,6 +199,32 @@ class TaskCollection implements Iterable<Task> {
         return tasks.size();
     }
 
+    public void saveToFile(String fileName) {
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        try {
+            objectMapper.writeValue(new File(fileName), tasks);
+        } catch (IOException e) {
+            System.out.println("Error saving tasks to file: " + e.getMessage());
+        }
+    }
+
+    public void loadFromFile(String fileName) {
+        if (Files.exists(Paths.get(fileName))) {
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            try {
+                List<Task> loadedTasks = objectMapper.readValue(
+                        new File(fileName),
+                        new TypeReference<List<Task>>() {});
+                tasks.clear();
+                tasks.addAll(loadedTasks);
+            } catch (IOException e) {
+                System.out.println("Error loading tasks from file: " + e.getMessage());
+            }
+        }
+    }
+
     @Override
     public Iterator<Task> iterator() {
         return tasks.iterator();
@@ -192,3 +235,4 @@ class TaskCollection implements Iterable<Task> {
         return tasks.toString();
     }
 }
+
